@@ -12,17 +12,30 @@ public class EventTracker implements Tracker {
     }
 
     synchronized public static EventTracker getInstance() {
-        return null;
+        return INSTANCE;
     }
 
     synchronized public void push(String message) {
+        Integer count = tracker.getOrDefault(message, 0);
+        tracker.put(message, count + 1);
     }
 
     synchronized public Boolean has(String message) {
-        return null;
+        Integer count = tracker.getOrDefault(message, 0);
+        return tracker.containsKey(message) && count > 0;
     }
 
     synchronized public void handle(String message, EventHandler e) {
+        try {
+            e.handle();
+            this.tracker.put(message, this.tracker.get(message) - 1);
+        } catch (NullPointerException n) {
+            System.out.println("Currently untracked.");
+        }
+    }
+
+    public Map<String, Integer> getTracker() {
+        return this.tracker;
     }
 
     // Do not use this. This constructor is for tests only
